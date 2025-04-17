@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Space Facts 🚀</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-3xl w-full">
+    <h1 class="text-4xl font-bold mb-4 text-center">🚀 NASA Astronomy Picture of the Day</h1>
+
+    <div class="mb-4 flex justify-center">
+      <input id="datePicker" type="date" class="text-black px-3 py-1 rounded" />
+      <button onclick="loadSpaceFact()" class="ml-2 bg-blue-600 px-4 py-1 rounded hover:bg-blue-700">Go</button>
+    </div>
+
+    <div id="content" class="text-center space-y-4">
+      <p class="text-gray-300">Loading today's cosmic masterpiece...</p>
+    </div>
+  </div>
+
+  <script>
+    async function loadSpaceFact() {
+      const date = document.getElementById("datePicker").value;
+      const url = `/space-fact${date ? `?date=${date}` : ''}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const html = `
+        <h2 class="text-2xl font-semibold">${data.title} (${data.date})</h2>
+        <img src="${data.url}" alt="${data.title}" class="rounded shadow mx-auto max-h-[500px]"/>
+        <p class="text-gray-300 text-left">${data.explanation}</p>
+      `;
+
+      document.getElementById("content").innerHTML = html;
+    }
+
+    loadSpaceFact(); // Load today's image on startup
+  </script>
+</body>
+</html>
