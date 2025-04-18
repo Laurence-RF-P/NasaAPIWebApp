@@ -19,6 +19,11 @@
       <p class="text-gray-300">Loading today's cosmic masterpiece...</p>
     </div>
   </div>
+  <div class="text-center mt-6">
+    <button onclick="openAsteroidModal()" class="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700">
+      🪐 Track Near-Earth Asteroids
+    </button>
+  </div>
 
   <script>
     async function loadSpaceFact() {
@@ -38,6 +43,68 @@
     }
 
     loadSpaceFact(); // Load today's image on startup
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("asteroidDate").value = today;
+    });
   </script>
+  <script>
+    function openAsteroidModal() {
+  document.getElementById("asteroidModal").classList.remove("hidden");
+}
+
+function closeAsteroidModal() {
+  document.getElementById("asteroidModal").classList.add("hidden");
+}
+
+async function loadAsteroids() {
+  const date = document.getElementById("asteroidDate").value;
+  const container = document.getElementById("asteroidResults");
+  container.innerHTML = "<p class='text-gray-300'>Loading space pebbles...</p>";
+
+  try {
+    const res = await fetch(`/asteroids?date=${date}`);
+    const asteroids = await res.json();
+
+    if (!asteroids.length) {
+      container.innerHTML = "<p class='text-yellow-400'>No asteroids tracked on this day — space is calm. ☁️</p>";
+      return;
+    }
+
+    container.innerHTML = asteroids.map(a => `
+      <div class="bg-gray-700 p-3 rounded">
+        <h3 class="font-bold text-lg">${a.name}</h3>
+        <ul class="text-gray-200">
+          <li><strong>Date:</strong> ${a.close_approach_date}</li>
+          <li><strong>Size:</strong> ${a.estimated_diameter_km.toFixed(2)} km</li>
+          <li><strong>Speed:</strong> ${a.relative_velocity_kmh.toFixed(0)} km/h</li>
+          <li><strong>Miss Distance:</strong> ${a.miss_distance_km.toLocaleString()} km</li>
+          <li><strong>Hazardous?</strong> ${a.is_potentially_hazardous ? "🚨 Yes" : "Nope 😌"}</li>
+        </ul>
+      </div>
+    `).join("");
+  } catch (err) {
+    container.innerHTML = "<p class='text-red-400'>Something went wrong! Check your connection or NASA’s servers.</p>";
+    console.error(err);
+  }
+}
+  </script>
+  <div id="asteroidModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center">
+    <div class="bg-gray-800 text-white p-6 rounded-lg max-w-2xl w-full shadow-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">🪨 Near-Earth Asteroids</h2>
+        <button onclick="closeAsteroidModal()" class="text-gray-400 hover:text-white text-lg">&times;</button>
+      </div>
+
+      <div class="mb-4 flex gap-2">
+        <input type="date" id="asteroidDate" class="text-black px-3 py-1 rounded w-full" />
+        <button onclick="loadAsteroids()" class="bg-yellow-500 px-4 py-1 rounded hover:bg-yellow-600">Track</button>
+      </div>
+
+      <div id="asteroidResults" class="space-y-2 max-h-[300px] overflow-y-auto text-sm">
+        <p class="text-gray-300">Choose a date to track space rocks near Earth.</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
